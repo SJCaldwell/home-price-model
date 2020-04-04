@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+
 import torch.nn.functional as F
 '''
 I’ve 2 images (1st is 256x256 and the second 64x64) and some data (list of 10 floats) as an input and I’d like to classify the data in 4 classes (for now).
@@ -12,9 +13,9 @@ I’ve 2 images (1st is 256x256 and the second 64x64) and some data (list of 10 
 # kitchen features4
 # numerical features - bed, bath, area, zip
 
-class MyModel(nn.Module):
+class HousePriceModel(nn.Module):
     def __init__(self):
-        super(MyModel, self).__init__()
+        super(HousePriceModel, self).__init__()
         self.features1 = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=3, kernel_size=3, stride=1, padding=1),
             nn.Conv2d(in_channels=12, out_channels=12, kernel_size=3, stride=1, padding=1),
