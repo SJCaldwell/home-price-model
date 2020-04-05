@@ -15,15 +15,15 @@ class HousePriceDataset(Dataset):
         :param transform:
         '''
         self.root_dir = root_dir
-        self.annotations = pd.read_csv(root_dir + '/' + csv_file)
+        self.annotations = pd.read_csv(root_dir + '/' + csv_file, delim_whitespace=True)
         self.annotations.index += 1 #starting at 1 makes reading our csv easier
         self.transform = transform
 
     def __len__(self):
         return len(self.annotations)
 
-    def __get__item(self, idx):
-        img_prefix = str(idx) + "_"
+    def __getitem__(self, idx):
+        img_prefix = self.root_dir + str(idx) + "_"
         bathroom_img = Image.open(img_prefix + 'bathroom.jpg')
         bedroom_img = Image.open(img_prefix +'bedroom.jpg')
         frontal_img = Image.open(img_prefix +'frontal.jpg')
