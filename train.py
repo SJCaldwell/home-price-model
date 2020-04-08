@@ -3,9 +3,10 @@ import torch
 import torchvision
 from torch import nn, optim
 import numpy as np
-from torchvision.transforms import Compose, CenterCrop, Resize, RandomHorizontalFlip, ToTensor
+from torchvision.transforms import Compose, CenterCrop, Resize, RandomHorizontalFlip, ToTensor, Normalize
 from dataset.dataset import HousePriceDataset
 from model.model import HousePriceModel
+from loss.loss import MAPELoss
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from utils.util import pct_accuracy
@@ -18,7 +19,7 @@ experiment = Experiment(api_key="ueodw9bjrtM4LGohzeyY0zNLG",
 np.random.seed(1)
 
 BATCH_SIZE = 8
-EPOCHS = 65
+EPOCHS = 200
 
 if torch.cuda.is_available():
     device = torch.device('cuda')
@@ -28,19 +29,19 @@ else:
     print('Using CPU')
 
 ### Define data once
-train_transforms = Compose([Resize((128, 128)), RandomHorizontalFlip(), ToTensor()])
+train_transforms = Compose([Resize((128, 128)), RandomHorizontalFlip(), ToTensor(), Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 full_dataset = HousePriceDataset(root_dir='../data/Houses-dataset/Houses Dataset/', csv_file='HousesInfo.txt', transform=train_transforms)
 train_size = int(0.8 * len(full_dataset))
 test_size = len(full_dataset) - train_size
 train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])
 
-train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True) # not divisible by batch size, so batch norm layer fails.
 val_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 model = HousePriceModel()
 model.to(device)
-opt = optim.Adam(model.parameters(), lr=.00001)
-crit = nn.MSELoss()
+opt = optim.Adam(model.parameters(), lr=.0001, weight_decay=1e-3/200)
+crit = MAPELoss
 
 for e in tqdm(range(EPOCHS)):
     with experiment.train():
@@ -56,7 +57,7 @@ for e in tqdm(range(EPOCHS)):
             price = price.to(device)
             est_price = model(bathroom, bedroom, frontal, kitchen, regr_vals)
 
-            loss = crit(price.squeeze(), est_price.squeeze())
+            loss = crit(est_price.squeeze(), price.squeeze())
             loss.backward()
             opt.step()
             train_loss += loss
