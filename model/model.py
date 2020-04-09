@@ -2,26 +2,6 @@ import torch
 import torch.nn as nn
 from torchvision.models import resnet18
 
-import torch.nn.functional as F
-
-'''
-
-'''
-
-# frontal features1 128x128
-# bedroom features2
-# bathroom features3
-# kitchen features4
-# numerical features - bed, bath, area, zip
-simple_feature_extractor = nn.Sequential(
-    nn.Conv2d(in_channels=3, out_channels=12, kernel_size=3, stride=1, padding=1),
-    nn.ReLU(),
-    nn.BatchNorm2d(64),
-    nn.Conv2d(in_channels=12, out_channels=12, kernel_size=3, stride=1, padding=1),
-    nn.MaxPool2d(2),
-    nn.ReLU(),
-)
-
 
 class HousePriceModel(nn.Module):
     def __init__(self, dropout=0.0):
@@ -39,8 +19,8 @@ class HousePriceModel(nn.Module):
             nn.Linear(10, 4),
             nn.ReLU(),
         )
-
-        self.input_layer = nn.Linear(2052, 64)
+        self.max_pool1 = nn.MaxPool1d(kernel_size=32, ceil_mode=False)
+        self.input_layer = nn.Linear(1556, 64)
         self.fc1 = nn.Linear(64, 64)
         self.bn1 = nn.BatchNorm1d(64)
         self.relu = nn.ReLU()
@@ -51,6 +31,10 @@ class HousePriceModel(nn.Module):
 
     def forward(self, x1, x2, x3, x4, x5):
         x1 = self.features1(x1)
+        x1 = x1.squeeze(3) # reduce hanging dimension
+        x1 = x1.transpose(1, 2) # the 512 dimension needs to be last for max pooling to work
+        x1 = self.max_pool1(x1)
+        x1 = x1.transpose(1, 2) # and slap it back
         x2 = self.features2(x2)
         x3 = self.features3(x3)
         x4 = self.features4(x4)
