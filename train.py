@@ -16,7 +16,7 @@ experiment = Experiment(api_key="ueodw9bjrtM4LGohzeyY0zNLG",
                         project_name="house-prices", workspace="sjcaldwell")
 
 # Set Seed
-np.random.seed(1)
+np.random.seed(666)
 
 BATCH_SIZE = 8
 EPOCHS = 200
@@ -38,10 +38,10 @@ train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True) # not divisible by batch size, so batch norm layer fails.
 val_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
-model = HousePriceModel()
+model = HousePriceModel(dropout=0.2)
 model.to(device)
 opt = optim.Adam(model.parameters(), lr=.0001, weight_decay=1e-3/200)
-crit = MAPELoss
+crit = nn.MSELoss()
 
 for e in tqdm(range(EPOCHS)):
     with experiment.train():
