@@ -18,7 +18,7 @@ experiment = Experiment(api_key="ueodw9bjrtM4LGohzeyY0zNLG",
 # Set Seed
 np.random.seed(666)
 
-BATCH_SIZE = 8
+BATCH_SIZE = 4
 EPOCHS = 200
 
 if torch.cuda.is_available():
