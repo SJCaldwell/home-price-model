@@ -14,11 +14,10 @@ from utils.util import pct_accuracy
 # Add the following code anywhere in your machine learning file
 experiment = Experiment(api_key="ueodw9bjrtM4LGohzeyY0zNLG",
                         project_name="house-prices", workspace="sjcaldwell")
-
 # Set Seed
-np.random.seed(666)
+np.random.seed(333)
 
-BATCH_SIZE = 4
+BATCH_SIZE = 8
 EPOCHS = 200
 
 if torch.cuda.is_available():
@@ -38,7 +37,7 @@ train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, drop_last=True) # not divisible by batch size, so batch norm layer fails.
 val_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
-model = HousePriceModel(dropout=0.2)
+model = HousePriceModel(dropout=0.0)
 model.to(device)
 opt = optim.Adam(model.parameters(), lr=.0001, weight_decay=1e-3/200)
 crit = nn.MSELoss()
@@ -87,9 +86,24 @@ for e in tqdm(range(EPOCHS)):
         if e == EPOCHS - 1:
             print('recording final loss')
             experiment.log_metric('final_loss', val_loss.detach().cpu().numpy())
-            single_loader = DataLoader(test_dataset, batch_size=1, shuffle=True)
-            pct_accurate = pct_accuracy(single_loader, model, device)
-            experiment.log_metric('accuracy', pct_accurate)
+            single_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+            val_check_loss = 0
+            for bathroom, bedroom, frontal, kitchen, regr_vals, price in single_loader:
+                bathroom = bathroom.to(device)
+                bedroom = bedroom.to(device)
+                frontal = frontal.to(device)
+                kitchen = kitchen.to(device)
+                regr_vals = regr_vals.to(device)
+                price = price.to(device)
+                est_price = model(bathroom, bedroom, frontal, kitchen, regr_vals).squeeze()
+                price = price.squeeze()
+                price_str = str(price.cpu())
+                est_price_str = str(est_price.cpu())
+                print("Actual price: {}. Estimated price: {}".format(price, est_price))
+                loss = crit(est_price, price)
+                val_check_loss += loss
+            val_check_loss /= BATCH_SIZE
+            experiment.log_metric('MAPE', val_check_loss)
 
     if e % 10 == 0:
         torch.save({
@@ -98,7 +112,6 @@ for e in tqdm(range(EPOCHS)):
             'train_loss': train_loss,
             'val_loss': val_loss},
             f'model_checkpoints/model_{experiment.get_key()}_checkpoint.pt')
-print('Training Complete')
 experiment.end()
 del model
 torch.cuda.empty_cache()  # empty model cache

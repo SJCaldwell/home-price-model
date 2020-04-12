@@ -101,6 +101,5 @@ class HousePriceModel(nn.Module):
         x = self.bn2(x)
         x = self.relu(x)
         x = self.dropout(x)
-
         x = self.regressor(x)
         return x

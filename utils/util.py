@@ -15,11 +15,18 @@ def pct_accuracy(val_loader, model, device, pct_close=0.25):
             price = price.to(device)
             est_price = model(bathroom, bedroom, frontal, kitchen, regr_vals).squeeze()
             price = price.squeeze()
-            est_price = est_price.cpu()
-            price = price.cpu()
+            output = est_price.cpu()
+            target = price.cpu()
             print("Actual price: {}. Estimated price: {}".format(price, est_price))
             if np.abs(est_price - price) < np.abs(pct_close * price):
                 n_correct += 1
             else:
                 n_wrong += 1
         return (n_correct * 100.0) / (n_correct + n_wrong)
+
+
+
+if __name__ == "__main__":
+    x = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=torch.float)
+    x = elementwise_max(x, 3)
+    print(x)
