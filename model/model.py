@@ -11,6 +11,13 @@ class HousePriceModel(nn.Module):
         self.feature_extractor = nn.Sequential(*list(self.backend.children())[:-1])
 
         self.features1 = self.feature_extractor
+        self.features1_post = nn.Sequential(
+            nn.MaxPool1d(kernel_size=32),
+            nn.Linear(16, 8),
+            nn.ReLU(),
+            nn.Linear(8, 4),
+            nn.ReLU()
+        )
         self.max_pool1 = nn.MaxPool1d(kernel_size=32)
         self.fc_rep1_1 = nn.Linear(16, 8)
         self.fc_rep2_1 = nn.Linear(8, 4)
