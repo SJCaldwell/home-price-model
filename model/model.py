@@ -16,7 +16,7 @@ import torch.nn.functional as F
 simple_feature_extractor = nn.Sequential(
     nn.Conv2d(in_channels=3, out_channels=12, kernel_size=3, stride=1, padding=1),
     nn.ReLU(),
-    nn.BatchNorm2d(64),
+    nn.BatchNorm2d(12),
     nn.Conv2d(in_channels=12, out_channels=12, kernel_size=3, stride=1, padding=1),
     nn.MaxPool2d(2),
     nn.ReLU(),
