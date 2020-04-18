@@ -22,7 +22,7 @@ def clean_zips(df):
             df.drop(idxs, inplace=True)
 
 def preprocess_continous(df, cont_var_names):
-    cs = MinMaxScaler()
+    cs = MinMaxScaler(feature_range=(1,2)) # prevent MAPE from dividing by 0
     df[cont_var_names] = cs.fit_transform(df[cont_var_names])
 
 def preprocess_categorical(df, categorical_var_names):

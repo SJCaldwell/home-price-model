@@ -83,7 +83,7 @@ class HouseMLP(nn.Module):
             nn.Linear(10, 8),
             nn.ReLU(),
             nn.Linear(8, 4),
-            nn.Relu(),
+            nn.ReLU(),
             nn.Linear(4, 1))
 
     def forward(self, x):

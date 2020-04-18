@@ -13,9 +13,9 @@ def elementwise_max(tensor, scalar):
   tensor2 = tensor2.cuda()
   return torch.max(tensor, tensor2)
 
-def MAPELoss(output, target):
+def MAPELoss(y_true, y_pred):
   eps = 1e-07
-  diff = torch.abs((target - output) / elementwise_max(torch.abs(target), eps))
+  diff = torch.abs((y_true - y_pred) / y_true)
   loss = 100. * diff.mean() #get average to reduce tensor size
   return loss
 
