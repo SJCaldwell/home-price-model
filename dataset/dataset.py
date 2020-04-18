@@ -29,7 +29,7 @@ def preprocess_categorical(df, categorical_var_names):
     zip_binarizer = LabelBinarizer().fit(df[categorical_var_names])
     vals = zip_binarizer.fit_transform(df[categorical_var_names])
     df[categorical_var_names] = vals
-class HousePriceDataset(Dataset):
+class HouseMixedDataset(Dataset):
 
     def __init__(self, root_dir, csv_file, transform=None):
         '''
@@ -67,3 +67,29 @@ class HousePriceDataset(Dataset):
 
         regr_independent_vars = np.hstack([num_bedrooms, num_bath, area, zip_code[0]])
         return bathroom_img, bedroom_img, frontal_img, kitchen_img, torch.Tensor(regr_independent_vars), torch.tensor(price)
+
+class HouseNumericalDataset(Dataset):
+
+    def __init__(self, root_dir, csv_file):
+        '''
+        :param root_dir:
+        :param csv_file:
+        '''
+        self.root_dir = root_dir
+        self.annotations = pd.read_csv(root_dir + '/' + csv_file, delim_whitespace = True)
+        clean_zips(self.annotations)
+        self.zip_binarizer = LabelBinarizer().fit(self.annotations['zip_code'])
+        preprocess_continous(self.annotations, ['num_bed', 'num_bath', 'area', 'price'])
+
+    def __len__(self):
+        return len(self.annotations)
+
+    def __getitem__(self, idx):
+        num_bedrooms = self.annotations.iloc[idx, 0]
+        num_bath = self.annotations.iloc[idx, 1]
+        area = self.annotations.iloc[idx, 2]
+        zip_code = self.zip_binarizer.transform([self.annotations.iloc[idx, 3]])
+        price = self.annotations.iloc[idx, 4]
+        # Place them in a single tensor
+        regr_independent_vars = np.hstack([num_bedrooms, num_bath, area, zip_code[0]])
+        return torch.Tensor(regr_independent_vars), torch.tensor(price)
