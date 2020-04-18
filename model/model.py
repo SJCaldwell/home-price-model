@@ -74,3 +74,18 @@ class HousePriceModel(nn.Module):
 
         x = self.regressor(x)
         return x
+
+
+class HouseMLP(nn.Module):
+    def __init__(self, dropout=0.0):
+        super(HouseMLP, self).__init__()
+        self.mlp = nn.Sequential(
+            nn.Linear(10, 8),
+            nn.ReLU(),
+            nn.Linear(8, 4),
+            nn.Relu(),
+            nn.Linear(4, 1))
+
+    def forward(self, x):
+        x = self.mlp(x)
+        return x
