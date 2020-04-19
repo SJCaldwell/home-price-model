@@ -102,9 +102,9 @@ class CNN_Unit(nn.Module):
     def forward(self, x):
         x = self.conv(x)
         x = self.bn(x)
-        x = self.relu(output)
+        x = self.relu(x)
 
-        return output
+        return x
 
 class SimpleNet(nn.Module):
     def __init__(self):
@@ -130,7 +130,7 @@ class SimpleNet(nn.Module):
 
         self.pool3 =  nn.MaxPool2d(kernel_size=2)
 
-        self.unit12 = nn.MaxPool2d(in_channels=128, out_channels=128)
+        self.unit12 = CNN_Unit(in_channels=128, out_channels=128)
 
         self.avgpool = nn.AvgPool2d(kernel_size=2)
 
@@ -144,7 +144,7 @@ class SimpleNet(nn.Module):
 
 class HouseMixed(nn.Module):
     def __init__(self, dropout=0.0):
-        super(HouseMLP, self).__init__()
+        super(HouseMixed, self).__init__()
         self.mlp = nn.Sequential(
             nn.Linear(10, 8),
             nn.ReLU(),
@@ -152,15 +152,17 @@ class HouseMixed(nn.Module):
             nn.ReLU())
 
         self.cnn = SimpleNet()
-        self.fc1 = nn.Linear(1024, 4)
+        self.fc1 = nn.Linear(1156, 4)
         self.relu1 = nn.ReLU()
         self.regr_head = nn.Linear(4, 1)
 
     def forward(self, x_img, x_regr):
         x1 = self.cnn(x_img)
         x2 = self.mlp(x_regr)
+        x1 = x1.view(x1.size(0), -1)
+        x2 = x2.view(x2.size(0), -1)
         x = torch.cat((x1, x2), dim=1)
         x = self.fc1(x)
-        x = self.ReLU(x)
+        x = self.relu1(x)
         x = self.regr_head(x)
         return x

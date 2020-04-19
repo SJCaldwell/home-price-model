@@ -49,9 +49,9 @@ class HouseMixedDataset(Dataset):
 
     def __getitem__(self, idx):
         img_prefix = self.root_dir + str(idx+1) + "_" # indexing scheme different
-        bathroom_img = Image.open(img_prefix + 'bathroom.jpg')
-        bedroom_img = Image.open(img_prefix +'bedroom.jpg')
-        frontal_img = Image.open(img_prefix +'frontal.jpg')
+        #bathroom_img = Image.open(img_prefix + 'bathroom.jpg')
+        #bedroom_img = Image.open(img_prefix +'bedroom.jpg')
+        #frontal_img = Image.open(img_prefix +'frontal.jpg')
         kitchen_img = Image.open(img_prefix +'kitchen.jpg')
         num_bedrooms = self.annotations.iloc[idx, 0]
         num_bath = self.annotations.iloc[idx, 1]
@@ -60,13 +60,13 @@ class HouseMixedDataset(Dataset):
         price = self.annotations.iloc[idx, 4]
 
         if self.transform:
-            bathroom_img = self.transform(bathroom_img)
-            bedroom_img = self.transform(bedroom_img)
-            frontal_img = self.transform(frontal_img)
+            #bathroom_img = self.transform(bathroom_img)
+            #bedroom_img = self.transform(bedroom_img)
+            #frontal_img = self.transform(frontal_img)
             kitchen_img = self.transform(kitchen_img)
 
         regr_independent_vars = np.hstack([num_bedrooms, num_bath, area, zip_code[0]])
-        return bathroom_img, bedroom_img, frontal_img, kitchen_img, torch.Tensor(regr_independent_vars), torch.tensor(price)
+        return kitchen_img, torch.Tensor(regr_independent_vars), torch.tensor(price)
 
 class HouseNumericalDataset(Dataset):
 
