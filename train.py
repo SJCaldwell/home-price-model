@@ -12,7 +12,7 @@ from tqdm import tqdm
 from utils.util import pct_accuracy
 
 # Add the following code anywhere in your machine learning file
-experiment = Experiment(api_key="ueodw9bjrtM4LGohzeyY0zNLG",
+experiment = Experiment(api_key=None,
                         project_name="house-prices-mlp", workspace="sjcaldwell")
 
 # Set Seed
